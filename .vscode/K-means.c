@@ -5,6 +5,8 @@
 #include <math.h>
 #include <string.h>
 
+void save_realloc(void *pointer, size_t new_size);
+
 /*cheacking integers validation*/
 bool parse_strict_integer(const char *str, int *out_value);
 
@@ -99,6 +101,18 @@ int main(int argc, char *argv[])
     return 0;
 }
 
+void save_realloc(void *pointer, size_t new_size)
+{
+    void *new_pointer = realloc(pointer, new_size);
+    if (new_pointer == NULL)
+    {
+        fprintf(stderr, "Memory allocation failed\n");
+        free(pointer);
+        exit(1);
+    }
+    return new_pointer;
+}
+
 bool parse_strict_integer(const char *str, int *out_value)
 {
     char *endptr;
@@ -185,7 +199,7 @@ float **read_vectors_from_file(FILE *file, int *N, int *d)
             if (current_d == capacity)
             {
                 capacity *= 2;
-                pVector = realloc(pVector, capacity * sizeof(float));
+                pVector = save_realloc(pVector, capacity * sizeof(float));
             }
             pVector[current_d] = atof(token);
             current_d++;
@@ -200,20 +214,10 @@ float **read_vectors_from_file(FILE *file, int *N, int *d)
         if (*N == capacityVecList)
         {
             capacityVecList *= 2;
-            float **temp = realloc(pListOfVec, capacityVecList * sizeof(float *));
-            if (temp == NULL)
-            {
-                /*free memory*/
-                for (int i = 0; i < capacityVecList; i++)
-                {
-                    free(pListOfVec[i]);
-                }
-                free(pListOfVec);
-                return 1;
-            }
+            float **temp = save_realloc(pListOfVec, capacityVecList * sizeof(float *));
             pListOfVec = temp;
         }
-        pListOfVec[*N] = realloc(pVector, *d * sizeof(float));
+        pListOfVec[*N] = save_realloc(pVector, *d * sizeof(float));
         (*N)++;
     }
     free(pLine);
