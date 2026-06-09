@@ -167,6 +167,15 @@ int main(int argc, char *argv[]) {
         }
         counter++;
     }
-
+    free(assignmentsToClusters);
+    free(pVector);
+    for (int i = 0; i < N; i++) {
+        free(pListOfVec[i]);
+    }
+    free(pListOfVec);
+    for (int i = 0; i < K; i++) {
+        free(pCentroids[i]);
+    }
+    free(pCentroids);
     return 0;
 }
