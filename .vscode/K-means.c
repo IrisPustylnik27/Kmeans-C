@@ -5,7 +5,7 @@
 #include <math.h>
 #include <string.h>
 
-void save_realloc(void *pointer, size_t new_size);
+void safe_realloc(void *pointer, size_t new_size);
 
 /*cheacking integers validation*/
 bool parse_strict_integer(const char *str, int *out_value);
@@ -24,6 +24,8 @@ void assign_vectors_to_clusters(float **pListOfVec, float **pCentroids, int *ass
 
 float *update_centroid(float **pListOfVec, int *assignmentsToClusters, int clusterIndex, int N, int d);
 
+void cleanup(float **pListOfVec, float **pCentroids, float *pCentroid, int *assignmentsToClusters, int N, int K, char *pLine, float *pVector);
+
 int main(int argc, char *argv[])
 {
     int N = 0, K = 0, d = 0;
@@ -31,8 +33,7 @@ int main(int argc, char *argv[])
     char *filename = NULL;
     int iter = 2;
     const float EPSILON = 0.001;
-    pVector = malloc(capacity * sizeof(float));
-    pListOfVec = malloc(capacityVecList * sizeof(float *));
+
 
     if (!parse_arguments(argc, argv, &K, &iter, &filename))
     {
@@ -91,7 +92,7 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-void save_realloc(void *pointer, size_t new_size)
+void safe_realloc(void *pointer, size_t new_size)
 {
     void *new_pointer = realloc(pointer, new_size);
     if (new_pointer == NULL)
@@ -141,29 +142,29 @@ bool parse_arguments(int argc, char *argv[], int *K, int *iter, char **filename)
         return false;
     }
 
-    if (!parse_strict_integer(argv[1], &K))
+    if (!parse_strict_integer(argv[1], K))
     {
         fprintf(stderr, "Invalid K value!\n");
         return false;
     }
-    K = atoi(argv[1]);
+    *K = atoi(argv[1]);
     if (argc == 4)
     {
-        if (!parse_strict_integer(argv[2], &iter))
+        if (!parse_strict_integer(argv[2], iter))
         {
             fprintf(stderr, "Invalid iteration value!\n");
             return false;
         }
-        iter = atoi(argv[2]);
-        filename = argv[3];
+        *iter = atoi(argv[2]);
+        *filename = argv[3];
     }
     else
     {
-        iter = 400;
-        filename = argv[2];
+        *iter = 400;
+        *filename = argv[2];
     }
 
-    if (iter > 799 || iter < 2)
+    if (*iter > 799 || *iter < 2)
     {
         printf("Incorrect maximum iteration!\n");
         return false;
@@ -189,7 +190,7 @@ float **read_vectors_from_file(FILE *file, int *N, int *d)
             if (current_d == capacity)
             {
                 capacity *= 2;
-                pVector = save_realloc(pVector, capacity * sizeof(float));
+                pVector = safe_realloc(pVector, capacity * sizeof(float));
             }
             pVector[current_d] = atof(token);
             current_d++;
@@ -204,13 +205,13 @@ float **read_vectors_from_file(FILE *file, int *N, int *d)
         if (*N == capacityVecList)
         {
             capacityVecList *= 2;
-            float **temp = save_realloc(pListOfVec, capacityVecList * sizeof(float *));
+            float **temp = safe_realloc(pListOfVec, capacityVecList * sizeof(float *));
             pListOfVec = temp;
         }
-        pListOfVec[*N] = save_realloc(pVector, *d * sizeof(float));
+        pListOfVec[*N] = safe_realloc(pVector, *d * sizeof(float));
         (*N)++;
     }
-    cleanup(NULL, NULL, NULL, NULL, 0, 0, pLine, pVector);
+    cleanup(NULL, NULL, NULL, NULL, 0, 0, pLine, NULL);
     return pListOfVec;
 }
 
