@@ -282,3 +282,30 @@ float *update_centroid(float **pListOfVec, int *assignmentsToClusters, int clust
     }
     return newCentroid;
 }
+
+void cleanup(float **pListOfVec, float **pCentroids, int *assignmentsToClusters, int N, int K, char *pLine)
+{
+    if (pLine != NULL){
+        free(pLine);
+    }
+    if (assignmentsToClusters != NULL)
+    {
+        free(assignmentsToClusters);
+    }
+    if (pListOfVec != NULL)
+    {
+        for (int i = 0; i < N; i++)
+        {
+            free(pListOfVec[i]);
+        }
+        free(pListOfVec);
+    }
+    if (pCentroids != NULL)
+    {
+        for (int i = 0; i < K; i++)
+        {
+            free(pCentroids[i]);
+        }
+        free(pCentroids);
+    }
+}
