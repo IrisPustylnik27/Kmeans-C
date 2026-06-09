@@ -3,38 +3,13 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <math.h>
+#include <string.h>
 
 /*cheacking integers validation*/
-bool parse_strict_integer(const char *str, int *out_value)
-{
-    char *endptr;
-    double val = strtod(str, &endptr);
-    if (str == endptr)
-    {
-        return false;
-    }
-    if (*endptr != '\0' && *endptr != '\n')
-    {
-        return false;
-    }
-    if (val != (int)val)
-    {
-        return false;
-    }
-    *out_value = (int)val;
-    return true;
-}
+bool parse_strict_integer(const char *str, int *out_value);
 
 /*calculating the euclidian distance between two vectors*/
-float calc_euclidian_distance(float *vec1, float *vec2, int d)
-{
-    float sum = 0.0;
-    for (int i = 0; i < d; i++)
-    {
-        sum += (vec1[i] - vec2[i]) * (vec1[i] - vec2[i]);
-    }
-    return sqrtf(sum);
-}
+float calc_euclidian_distance(float *vec1, float *vec2, int d);
 
 int main(int argc, char *argv[])
 {
@@ -42,13 +17,14 @@ int main(int argc, char *argv[])
     size_t len = 0;
     float *pVector = NULL, **pCentroids = NULL, **pListOfVec = NULL;
     char *pLine = NULL;
+    char *filename = NULL;
     int iter = 2;
-    float static epsilon = 0.001;
+    const float EPSILON = 0.001;
     int capacity = 5, capacityVecList = 5;
     pVector = malloc(capacity * sizeof(float));
     pListOfVec = malloc(capacityVecList * sizeof(float *));
 
-    if (argc > 4 || argc < 2)
+    if (argc > 4 || argc < 3)
     {
         fprintf(stderr, "wrong number of arguments!\n");
         return 1;
@@ -68,12 +44,12 @@ int main(int argc, char *argv[])
             return 1;
         }
         iter = atoi(argv[2]);
-        char *filename = argv[3];
+        filename = argv[3];
     }
     else
     {
         iter = 400;
-        char *filename = argv[2];
+        filename = argv[2];
     }
 
     if (iter > 799 || iter < 2)
@@ -189,7 +165,7 @@ int main(int argc, char *argv[])
                 newCentroid[i] = newCentroid[i] / abs(total);
             }
             deltaCentroids = calc_euclidian_distance(newCentroid, oldCentroid, d);
-            if (deltaCentroids < epsilon)
+            if (deltaCentroids < EPSILON)
             {
                 isConverged = true;
             }
@@ -211,4 +187,34 @@ int main(int argc, char *argv[])
     }
     free(pCentroids);
     return 0;
+}
+
+bool parse_strict_integer(const char *str, int *out_value)
+{
+    char *endptr;
+    double val = strtod(str, &endptr);
+    if (str == endptr)
+    {
+        return false;
+    }
+    if (*endptr != '\0' && *endptr != '\n')
+    {
+        return false;
+    }
+    if (val != (int)val)
+    {
+        return false;
+    }
+    *out_value = (int)val;
+    return true;
+}
+
+float calc_euclidian_distance(float *vec1, float *vec2, int d)
+{
+    float sum = 0.0;
+    for (int i = 0; i < d; i++)
+    {
+        sum += (vec1[i] - vec2[i]) * (vec1[i] - vec2[i]);
+    }
+    return sqrtf(sum);
 }
