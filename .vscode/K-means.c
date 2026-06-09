@@ -33,25 +33,27 @@ int main(int argc, char *argv[]) {
     pVector = malloc(capacity * sizeof(float));
     pListOfVec = malloc(capacityVecList * sizeof(float*));
 
-    if (argc > 3 || argc < 2) {
+    if (argc > 4 || argc < 2) {
 		fprintf (stderr, "wrong number of arguments!\n");
 		return 1;
 	}
-    
+
     if (!parse_strict_integer(argv[1], &K)) {
         fprintf(stderr, "Invalid K value!\n");
         return 1;
     }
     K = atoi(argv[1]);
-    if(argc == 3){
+    if(argc == 4){
         if (!parse_strict_integer(argv[2], &iter)) {
             fprintf(stderr, "Invalid iteration value!\n");
             return 1;
         }
         iter = atoi(argv[2]);
+        char *filename = argv[3];
     }
     else{
         iter=400;
+        char *filename = argv[2];
     }
 
     if(iter > 799 || iter < 2){
@@ -59,18 +61,14 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
-    bool isLast= false;
-    /*first line*/
-    getline(&pLine, &len, stdin);
-    int next_char = fgetc(stdin);
-    if (next_char == EOF) {
-        isLast = true;
-    } 
-    else {
-        ungetc(next_char, stdin);
+    FILE *file = fopen(filename, "r");
+    if (file == NULL) {
+        printf("Error: Could not open or find file '%s'\n", filename);
+        return 1;
     }
+
     /*read the vectors*/
-    while (!isLast) {
+    while ((getline(&pLine, &len, file)) != -1) {
         char *token = strtok(pLine, ",");
         /* initialize the vector */
         while (token != NULL) {
@@ -98,16 +96,14 @@ int main(int argc, char *argv[]) {
         }
         pListOfVec[N] = realloc(pVector, d * sizeof(float));
         N++;
-        /*check if last*/
-        next_char = fgetc(stdin);
-        if (next_char == EOF) {
-            isLast = true;
-        } 
-        else {
-            ungetc(next_char, stdin);
-            getline(&pLine, &len, stdin);
-        }
     }
+
+    if(N<=K){
+        printf( "Number of clusters must be less than number of vectors!\n");
+        return 1;
+    }
+    
+    fclose(file);
 
     return 0;
 }
