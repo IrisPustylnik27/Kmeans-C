@@ -16,6 +16,8 @@ float calc_euclidian_distance(float *vec1, float *vec2, int d);
 
 float **read_vectors_from_file(FILE *file, int *N, int *d);
 
+float **init_centroids(float **pListOfVec, int K, int d);
+
 int main(int argc, char *argv[])
 {
     int N = 0, K = 0, d = 0;
@@ -39,7 +41,6 @@ int main(int argc, char *argv[])
     }
 
     /*read the vectors*/
-
     pListOfVec = read_vectors_from_file(file, &N, &d);
 
     if (N <= K)
@@ -57,13 +58,8 @@ int main(int argc, char *argv[])
     bool isConverged = false;
 
     /*initialize the centroids*/
-    pCentroids = malloc(K * sizeof(float *));
-    for (int i = 0; i < K; i++)
-    {
-        pCentroids[i] = realloc(pListOfVec[i], d * sizeof(float));
-        assignmentsToClusters[i] = i;
-    }
-
+    pCentroids = init_centroids(pListOfVec, K, d);
+    
     while (counter <= iter && !isConverged)
     {
         /* step 1: assign vectors to clusters */
@@ -247,4 +243,17 @@ float **read_vectors_from_file(FILE *file, int *N, int *d)
     }
     free(pLine);
     return pListOfVec;
+}
+
+float **init_centroids(float **pListOfVec, int K, int d){
+    float **pCentroids = malloc(K * sizeof(float *));
+    for (int i = 0; i < K; i++)
+    {
+        pCentroids[i] = malloc(d * sizeof(float));
+        for (int j = 0; j < d; j++)
+        {
+            pCentroids[i][j] = pListOfVec[i][j];
+        }
+    }
+    return pCentroids;
 }
