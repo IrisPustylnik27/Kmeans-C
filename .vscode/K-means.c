@@ -14,16 +14,15 @@ bool parse_arguments(int argc, char *argv[], int *K, int *iter, char **filename)
 /*calculating the euclidian distance between two vectors*/
 float calc_euclidian_distance(float *vec1, float *vec2, int d);
 
+float **read_vectors_from_file(FILE *file, int *N, int *d);
+
 int main(int argc, char *argv[])
 {
     int N = 0, K = 0, d = 0;
-    size_t len = 0;
     float *pVector = NULL, **pCentroids = NULL, **pListOfVec = NULL;
-    char *pLine = NULL;
     char *filename = NULL;
     int iter = 2;
     const float EPSILON = 0.001;
-    int capacity = 5, capacityVecList = 5;
     pVector = malloc(capacity * sizeof(float));
     pListOfVec = malloc(capacityVecList * sizeof(float *));
 
@@ -40,41 +39,8 @@ int main(int argc, char *argv[])
     }
 
     /*read the vectors*/
-    while ((getline(&pLine, &len, file)) != -1)
-    {
-        char *token = strtok(pLine, ",");
-        /* initialize the vector */
-        while (token != NULL)
-        {
-            if (d == capacity)
-            {
-                capacity *= 2;
-                pVector = realloc(pVector, capacity * sizeof(float));
-            }
-            pVector[d] = atof(token);
-            d++;
-            token = strtok(NULL, ",");
-        }
-        /*add the vector to the list*/
-        if (N == capacityVecList)
-        {
-            capacityVecList *= 2;
-            float **temp = realloc(pListOfVec, capacityVecList * sizeof(float *));
-            if (temp == NULL)
-            {
-                /*free memory*/
-                for (int i = 0; i < capacityVecList; i++)
-                {
-                    free(pListOfVec[i]);
-                }
-                free(pListOfVec);
-                return 1;
-            }
-            pListOfVec = temp;
-        }
-        pListOfVec[N] = realloc(pVector, d * sizeof(float));
-        N++;
-    }
+
+    pListOfVec = read_vectors_from_file(file, &N, &d);
 
     if (N <= K)
     {
@@ -82,7 +48,6 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    free(pLine);
     fclose(file);
 
     /*fun begins*/
@@ -193,7 +158,8 @@ float calc_euclidian_distance(float *vec1, float *vec2, int d)
     return sqrtf(sum);
 }
 
-bool parse_arguments(int argc, char *argv[], int *K, int *iter, char **filename){
+bool parse_arguments(int argc, char *argv[], int *K, int *iter, char **filename)
+{
     if (argc > 4 || argc < 3)
     {
         fprintf(stderr, "wrong number of arguments!\n");
@@ -228,4 +194,57 @@ bool parse_arguments(int argc, char *argv[], int *K, int *iter, char **filename)
         return false;
     }
     return true;
+}
+
+float **read_vectors_from_file(FILE *file, int *N, int *d)
+{
+    size_t len = 0;
+    char *pLine = NULL;
+    int capacity = 5, capacityVecList = 5;
+    float **pListOfVec = malloc(capacityVecList * sizeof(float *));
+
+    while ((getline(&pLine, &len, file)) != -1)
+    {
+        int current_d = 0;
+        float *pVector = malloc(capacity * sizeof(float));
+        char *token = strtok(pLine, ",");
+        /* initialize the vector */
+        while (token != NULL)
+        {
+            if (current_d == capacity)
+            {
+                capacity *= 2;
+                pVector = realloc(pVector, capacity * sizeof(float));
+            }
+            pVector[current_d] = atof(token);
+            current_d++;
+            token = strtok(NULL, ",");
+        }
+
+        if(*d == 0)
+        {
+            *d = current_d;
+        }
+        /*add the vector to the list*/
+        if (*N == capacityVecList)
+        {
+            capacityVecList *= 2;
+            float **temp = realloc(pListOfVec, capacityVecList * sizeof(float *));
+            if (temp == NULL)
+            {
+                /*free memory*/
+                for (int i = 0; i < capacityVecList; i++)
+                {
+                    free(pListOfVec[i]);
+                }
+                free(pListOfVec);
+                return 1;
+            }
+            pListOfVec = temp;
+        }
+        pListOfVec[*N] = realloc(pVector, *d * sizeof(float));
+        (*N)++;
+    }
+    free(pLine);
+    return pListOfVec;
 }
