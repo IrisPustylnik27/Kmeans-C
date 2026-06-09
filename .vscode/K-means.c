@@ -2,6 +2,7 @@
 # include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <math.h>
 
 /*cheacking integers validation*/
 bool parse_strict_integer(const char *str, int *out_value) {
@@ -18,6 +19,14 @@ bool parse_strict_integer(const char *str, int *out_value) {
     }
     *out_value = (int)val;
     return true;
+}
+
+float calc_euclidian_distance(float *vec1, float *vec2, int d) {
+    float sum = 0.0;
+    for(int i= 0; i<d; i++){
+        sum += (vec1[i] - vec2[i]) * (vec1[i] - vec2[i]);
+    }
+    return sqrtf(sum);
 }
 
 
@@ -102,8 +111,11 @@ int main(int argc, char *argv[]) {
         printf( "Number of clusters must be less than number of vectors!\n");
         return 1;
     }
-    
+
+    free(pLine);
     fclose(file);
+
+    /*fun begins*/
 
     return 0;
 }
