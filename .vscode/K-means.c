@@ -82,22 +82,12 @@ int main(int argc, char *argv[])
                 isConverged = true;
             }
             pCentroids[j] = newCentroid;
-            free(oldCentroid);
+            cleanup(NULL, NULL, oldCentroid, NULL, 0, 0, NULL, NULL);
         }
         counter++;
     }
-    free(assignmentsToClusters);
-    free(pVector);
-    for (int i = 0; i < N; i++)
-    {
-        free(pListOfVec[i]);
-    }
-    free(pListOfVec);
-    for (int i = 0; i < K; i++)
-    {
-        free(pCentroids[i]);
-    }
-    free(pCentroids);
+    cleanup(pListOfVec, pCentroids, NULL, assignmentsToClusters, N, K, NULL, NULL);
+    
     return 0;
 }
 
@@ -220,7 +210,7 @@ float **read_vectors_from_file(FILE *file, int *N, int *d)
         pListOfVec[*N] = save_realloc(pVector, *d * sizeof(float));
         (*N)++;
     }
-    free(pLine);
+    cleanup(NULL, NULL, NULL, NULL, 0, 0, pLine, pVector);
     return pListOfVec;
 }
 
@@ -283,10 +273,14 @@ float *update_centroid(float **pListOfVec, int *assignmentsToClusters, int clust
     return newCentroid;
 }
 
-void cleanup(float **pListOfVec, float **pCentroids, int *assignmentsToClusters, int N, int K, char *pLine)
+void cleanup(float **pListOfVec, float **pCentroids, float *pCentroid, int *assignmentsToClusters, int N, int K, char *pLine, float *pVector)
 {
     if (pLine != NULL){
         free(pLine);
+    }
+    if (pVector != NULL)
+    {
+        free(pVector);
     }
     if (assignmentsToClusters != NULL)
     {
@@ -307,5 +301,9 @@ void cleanup(float **pListOfVec, float **pCentroids, int *assignmentsToClusters,
             free(pCentroids[i]);
         }
         free(pCentroids);
+    }
+    if (pCentroid != NULL)
+    {
+        free(pCentroid);
     }
 }
