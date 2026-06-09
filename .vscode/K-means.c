@@ -8,6 +8,9 @@
 /*cheacking integers validation*/
 bool parse_strict_integer(const char *str, int *out_value);
 
+/*parsing the arguments and validating them*/
+bool parse_arguments(int argc, char *argv[], int *K, int *iter, char **filename);
+
 /*calculating the euclidian distance between two vectors*/
 float calc_euclidian_distance(float *vec1, float *vec2, int d);
 
@@ -24,38 +27,9 @@ int main(int argc, char *argv[])
     pVector = malloc(capacity * sizeof(float));
     pListOfVec = malloc(capacityVecList * sizeof(float *));
 
-    if (argc > 4 || argc < 3)
+    if (!parse_arguments(argc, argv, &K, &iter, &filename))
     {
-        fprintf(stderr, "wrong number of arguments!\n");
         return 1;
-    }
-
-    if (!parse_strict_integer(argv[1], &K))
-    {
-        fprintf(stderr, "Invalid K value!\n");
-        return 1;
-    }
-    K = atoi(argv[1]);
-    if (argc == 4)
-    {
-        if (!parse_strict_integer(argv[2], &iter))
-        {
-            fprintf(stderr, "Invalid iteration value!\n");
-            return 1;
-        }
-        iter = atoi(argv[2]);
-        filename = argv[3];
-    }
-    else
-    {
-        iter = 400;
-        filename = argv[2];
-    }
-
-    if (iter > 799 || iter < 2)
-    {
-        printf("Incorrect maximum iteration!\n");
-        return 0;
     }
 
     FILE *file = fopen(filename, "r");
@@ -217,4 +191,41 @@ float calc_euclidian_distance(float *vec1, float *vec2, int d)
         sum += (vec1[i] - vec2[i]) * (vec1[i] - vec2[i]);
     }
     return sqrtf(sum);
+}
+
+bool parse_arguments(int argc, char *argv[], int *K, int *iter, char **filename){
+    if (argc > 4 || argc < 3)
+    {
+        fprintf(stderr, "wrong number of arguments!\n");
+        return false;
+    }
+
+    if (!parse_strict_integer(argv[1], &K))
+    {
+        fprintf(stderr, "Invalid K value!\n");
+        return false;
+    }
+    K = atoi(argv[1]);
+    if (argc == 4)
+    {
+        if (!parse_strict_integer(argv[2], &iter))
+        {
+            fprintf(stderr, "Invalid iteration value!\n");
+            return false;
+        }
+        iter = atoi(argv[2]);
+        filename = argv[3];
+    }
+    else
+    {
+        iter = 400;
+        filename = argv[2];
+    }
+
+    if (iter > 799 || iter < 2)
+    {
+        printf("Incorrect maximum iteration!\n");
+        return false;
+    }
+    return true;
 }
