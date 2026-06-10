@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
     /*initialize the centroids*/
     pCentroids = init_centroids(pListOfVec, K, d);
 
-    while (counter <= iter && !isConverged)
+    while (counter < iter && !isConverged)
     {
         /* step 1: assign vectors to clusters */
         assign_vectors_to_clusters(pListOfVec, pCentroids, assignmentsToClusters, N, K, d);
