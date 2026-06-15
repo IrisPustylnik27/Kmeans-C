@@ -5,7 +5,7 @@
 #include <math.h>
 #include <string.h>
 
-void *safe_realloc(void *pointer, size_t new_size);
+void safe_realloc(void *pointer, size_t new_size);
 
 /*cheacking integers validation*/
 bool parse_strict_integer(const char *str, int *out_value);
@@ -28,22 +28,19 @@ void cleanup(float **pListOfVec, float **pCentroids, float *pCentroid, int *assi
 
 int main(int argc, char *argv[])
 {
-    int N = 0, K = 0, d = 0,counter = 0,j=0;
-    float **pCentroids = NULL, **pListOfVec = NULL;
+    int N = 0, K = 0, d = 0;
+    float *pVector = NULL, **pCentroids = NULL, **pListOfVec = NULL;
     char *filename = NULL;
     int iter = 2;
     const float EPSILON = 0.001;
-    FILE *file = fopen(filename, "r");
-    float deltaCentroids = 0.0;
-    int *assignmentsToClusters;
-    bool isConverged = false;
+
 
     if (!parse_arguments(argc, argv, &K, &iter, &filename))
     {
         return 1;
     }
 
-    
+    FILE *file = fopen(filename, "r");
     if (file == NULL)
     {
         printf("Error: Could not open or find file '%s'\n", filename);
@@ -62,7 +59,10 @@ int main(int argc, char *argv[])
     fclose(file);
 
     /*fun begins*/
-    assignmentsToClusters = malloc(N * sizeof(int));
+    int counter = 0;
+    float deltaCentroids = 0.0;
+    int *assignmentsToClusters = malloc(N * sizeof(int));
+    bool isConverged = false;
 
     /*initialize the centroids*/
     pCentroids = init_centroids(pListOfVec, K, d);
@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
         assign_vectors_to_clusters(pListOfVec, pCentroids, assignmentsToClusters, N, K, d);
 
         /* step 2: update centroids and calculate the difference */
-        for (j = 0; j < K; j++)
+        for (int j = 0; j < K; j++)
         {
             float *oldCentroid = pCentroids[j];
             float *newCentroid = update_centroid(pListOfVec, assignmentsToClusters, j, N, d);
@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-void *safe_realloc(void *pointer, size_t new_size)
+void safe_realloc(void *pointer, size_t new_size)
 {
     void *new_pointer = realloc(pointer, new_size);
     if (new_pointer == NULL)
@@ -100,7 +100,6 @@ void *safe_realloc(void *pointer, size_t new_size)
         fprintf(stderr, "Memory allocation failed\n");
         free(pointer);
         exit(1);
-        return NULL;
     }
     return new_pointer;
 }
@@ -127,9 +126,8 @@ bool parse_strict_integer(const char *str, int *out_value)
 
 float calc_euclidian_distance(float *vec1, float *vec2, int d)
 {
-    int i;
     float sum = 0.0;
-    for (i = 0; i < d; i++)
+    for (int i = 0; i < d; i++)
     {
         sum += (vec1[i] - vec2[i]) * (vec1[i] - vec2[i]);
     }
@@ -186,7 +184,6 @@ float **read_vectors_from_file(FILE *file, int *N, int *d)
         int current_d = 0;
         float *pVector = malloc(capacity * sizeof(float));
         char *token = strtok(pLine, ",");
-        float **temp;
         /* initialize the vector */
         while (token != NULL)
         {
@@ -208,7 +205,7 @@ float **read_vectors_from_file(FILE *file, int *N, int *d)
         if (*N == capacityVecList)
         {
             capacityVecList *= 2;
-            temp = safe_realloc(pListOfVec, capacityVecList * sizeof(float *));
+            float **temp = safe_realloc(pListOfVec, capacityVecList * sizeof(float *));
             pListOfVec = temp;
         }
         pListOfVec[*N] = safe_realloc(pVector, *d * sizeof(float));
@@ -220,12 +217,11 @@ float **read_vectors_from_file(FILE *file, int *N, int *d)
 
 float **init_centroids(float **pListOfVec, int K, int d)
 {
-    int i,j;
     float **pCentroids = malloc(K * sizeof(float *));
-    for (i = 0; i < K; i++)
+    for (int i = 0; i < K; i++)
     {
         pCentroids[i] = malloc(d * sizeof(float));
-        for (j = 0; j < d; j++)
+        for (int j = 0; j < d; j++)
         {
             pCentroids[i][j] = pListOfVec[i][j];
         }
@@ -235,12 +231,11 @@ float **init_centroids(float **pListOfVec, int K, int d)
 
 void assign_vectors_to_clusters(float **pListOfVec, float **pCentroids, int *assignmentsToClusters, int N, int K, int d)
 {
-    int i,j;
-    for (i = 0; i < N; i++)
+    for (int i = 0; i < N; i++)
     {
         float minDistance = calc_euclidian_distance(pListOfVec[i], pCentroids[0], d);
         int closestCentroid = 0;
-        for (j = 1; j < K; j++)
+        for (int j = 1; j < K; j++)
         {
             float distance = calc_euclidian_distance(pListOfVec[i], pCentroids[j], d);
             if (distance < minDistance)
@@ -255,14 +250,14 @@ void assign_vectors_to_clusters(float **pListOfVec, float **pCentroids, int *ass
 
 float *update_centroid(float **pListOfVec, int *assignmentsToClusters, int clusterIndex, int N, int d)
 {
-    int i,j,total = 0;
-    float *newCentroid;
-    newCentroid = calloc(d, sizeof(float));
+    int i, j;
+    int total = 0;
+    float *newCentroid = calloc(d, sizeof(float));
     for (i = 0; i < N; i++)
     {
         if (assignmentsToClusters[i] == clusterIndex)
         {
-            for (j = 0; j < d; j++)
+            for (int j = 0; j < d; j++)
             {
                 newCentroid[j] += pListOfVec[i][j];
             }
@@ -273,7 +268,7 @@ float *update_centroid(float **pListOfVec, int *assignmentsToClusters, int clust
     {
         return newCentroid;
     }
-    for (i = 0; i < d; i++)
+    for (int i = 0; i < d; i++)
     {
         newCentroid[i] = newCentroid[i] / total;
     }
