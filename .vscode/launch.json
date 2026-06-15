@@ -8,10 +8,10 @@
             "name": "C Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${fileDirname}/${fileBasenameNoExtension}",
-            "args": [],
+            "program": "${workspaceFolder}/kmeans",
+            "args": ["3", "600", "/home/developer/fuzzy-invention-1/input_1.txt"],
             "stopAtEntry": false,
-            "cwd": "${fileDirname}",
+            "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
@@ -28,6 +28,6 @@
                 }
             ],
             "preLaunchTask": "C/C++: gcc build active file"
-        },
+        }
     ]
 }

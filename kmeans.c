@@ -26,6 +26,8 @@ float *update_centroid(float **pListOfVec, int *assignmentsToClusters, int clust
 
 void cleanup(float **pListOfVec, float **pCentroids, float *pCentroid, int *assignmentsToClusters, int N, int K, char *pLine, float *pVector);
 
+void print_centroids(float **pCentroids, int K, int d);
+
 int main(int argc, char *argv[])
 {
     int N = 0, K = 0, d = 0,counter = 0,j=0;
@@ -33,7 +35,7 @@ int main(int argc, char *argv[])
     char *filename = NULL;
     int iter = 2;
     const float EPSILON = 0.001;
-    FILE *file = fopen(filename, "r");
+    FILE *file;
     float deltaCentroids = 0.0;
     int *assignmentsToClusters;
     bool isConverged = false;
@@ -43,7 +45,9 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    
+    file = fopen(filename, "r");
+
+
     if (file == NULL)
     {
         printf("Error: Could not open or find file '%s'\n", filename);
@@ -87,6 +91,7 @@ int main(int argc, char *argv[])
         }
         counter++;
     }
+    print_centroids(pCentroids, K, d);
     cleanup(pListOfVec, pCentroids, NULL, assignmentsToClusters, N, K, NULL, NULL);
     
     return 0;
@@ -313,5 +318,22 @@ void cleanup(float **pListOfVec, float **pCentroids, float *pCentroid, int *assi
     if (pCentroid != NULL)
     {
         free(pCentroid);
+    }
+}
+
+void print_centroids(float **pCentroids, int K, int d)
+{
+    int i, j;
+    for (i = 0; i < K; i++)
+    {
+        for (j = 0; j < d; j++)
+        {
+            printf("%.4f", pCentroids[i][j]);
+            if (j < d - 1)
+            {
+                printf(",");
+            }
+        }
+        printf("\n");
     }
 }
