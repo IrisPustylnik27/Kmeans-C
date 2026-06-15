@@ -73,6 +73,7 @@ int main(int argc, char *argv[])
 
     while (counter < iter && !isConverged)
     {
+        isConverged = true;
         /* step 1: assign vectors to clusters */
         assign_vectors_to_clusters(pListOfVec, pCentroids, assignmentsToClusters, N, K, d);
 
@@ -82,9 +83,9 @@ int main(int argc, char *argv[])
             float *oldCentroid = pCentroids[j];
             float *newCentroid = update_centroid(pListOfVec, assignmentsToClusters, j, N, d);
             deltaCentroids = calc_euclidian_distance(newCentroid, oldCentroid, d);
-            if (deltaCentroids < EPSILON)
+            if (deltaCentroids >= EPSILON)
             {
-                isConverged = true;
+                isConverged = false;
             }
             pCentroids[j] = newCentroid;
             cleanup(NULL, NULL, oldCentroid, NULL, 0, 0, NULL, NULL);
