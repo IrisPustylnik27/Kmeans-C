@@ -11,7 +11,7 @@ void *safe_realloc(void *pointer, size_t new_size);
 bool parse_strict_integer(const char *str, int *out_value);
 
 /*parsing the arguments and validating them*/
-bool parse_arguments(int argc, char *argv[], int *K, int *iter, char **filename);
+bool parse_arguments(int argc, char *argv[], int *K, int *iter);
 
 /*calculating the euclidian distance between two vectors*/
 double calc_euclidian_distance(double *vec1, double *vec2, int d);
@@ -32,30 +32,19 @@ int main(int argc, char *argv[])
 {
     int N = 0, K = 0, d = 0,counter = 0,j=0;
     double **pCentroids = NULL, **pListOfVec = NULL;
-    char *filename = NULL;
     int iter = 2;
     const double EPSILON = 0.001;
-    FILE *file;
     double deltaCentroids = 0.0;
     int *assignmentsToClusters;
     bool isConverged = false;
 
-    if (!parse_arguments(argc, argv, &K, &iter, &filename))
+    if (!parse_arguments(argc, argv, &K, &iter))
     {
-        return 1;
-    }
-
-    file = fopen(filename, "r");
-
-
-    if (file == NULL)
-    {
-        printf("Error: Could not open or find file '%s'\n", filename);
         return 1;
     }
 
     /*read the vectors*/
-    pListOfVec = read_vectors_from_file(file, &N, &d);
+    pListOfVec = read_vectors_from_file(stdin, &N, &d);
 
     if (N <= K)
     {
@@ -63,7 +52,6 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    fclose(file);
 
     /*fun begins*/
     assignmentsToClusters = malloc(N * sizeof(int));
@@ -142,9 +130,9 @@ double calc_euclidian_distance(double *vec1, double *vec2, int d)
     return sqrt(sum);
 }
 
-bool parse_arguments(int argc, char *argv[], int *K, int *iter, char **filename)
+bool parse_arguments(int argc, char *argv[], int *K, int *iter)
 {
-    if (argc > 4 || argc < 3)
+    if (argc > 3 || argc < 2)
     {
         fprintf(stderr, "wrong number of arguments!\n");
         return false;
@@ -155,21 +143,20 @@ bool parse_arguments(int argc, char *argv[], int *K, int *iter, char **filename)
         fprintf(stderr, "Invalid K value!\n");
         return false;
     }
-    *K = atoi(argv[1]);
-    if (argc == 4)
+    //*K = atoi(argv[1]);
+
+    if (argc == 3)
     {
         if (!parse_strict_integer(argv[2], iter))
         {
             fprintf(stderr, "Invalid iteration value!\n");
             return false;
         }
-        *iter = atoi(argv[2]);
-        *filename = argv[3];
+       // *iter = atoi(argv[2]);
     }
     else
     {
         *iter = 400;
-        *filename = argv[2];
     }
 
     if (*iter > 799 || *iter < 2)
