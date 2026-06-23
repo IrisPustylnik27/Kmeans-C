@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
     /*read the vectors*/
     pListOfVec = read_vectors_from_file(stdin, &N, &d);
 
-    if (N <= K) || (K < 2)
+    if ((N <= K) || (K < 2))
     {
         printf("Incorrect number of clusters!\n");
         return 1;
