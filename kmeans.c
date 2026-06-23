@@ -46,9 +46,9 @@ int main(int argc, char *argv[])
     /*read the vectors*/
     pListOfVec = read_vectors_from_file(stdin, &N, &d);
 
-    if (N <= K)
+    if (N <= K) || (K < 2)
     {
-        printf("Number of clusters must be less than number of vectors!\n");
+        printf("Incorrect number of clusters!\n");
         return 1;
     }
 
@@ -91,7 +91,7 @@ void *safe_realloc(void *pointer, size_t new_size)
     void *new_pointer = realloc(pointer, new_size);
     if (new_pointer == NULL)
     {
-        fprintf(stderr, "Memory allocation failed\n");
+        fprintf(stderr, "An Error Has Occured\n");
         free(pointer);
         exit(1);
         return NULL;
@@ -134,25 +134,23 @@ bool parse_arguments(int argc, char *argv[], int *K, int *iter)
 {
     if (argc > 3 || argc < 2)
     {
-        fprintf(stderr, "wrong number of arguments!\n");
+        fprintf(stderr, "An Error Has Occured\n");
         return false;
     }
 
     if (!parse_strict_integer(argv[1], K))
     {
-        fprintf(stderr, "Invalid K value!\n");
+        fprintf(stderr, "Incorrect number of clusters!\n");
         return false;
     }
-    //*K = atoi(argv[1]);
 
     if (argc == 3)
     {
         if (!parse_strict_integer(argv[2], iter))
         {
-            fprintf(stderr, "Invalid iteration value!\n");
+            fprintf(stderr, "Incorrect maximum iteration!\n");
             return false;
         }
-       // *iter = atoi(argv[2]);
     }
     else
     {
